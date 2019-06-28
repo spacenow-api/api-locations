@@ -11,11 +11,11 @@ const initialize = () => {
     console.debug('Initializing database.');
     sequelize = new Sequelize({
       dialect: 'mysql',
-      host: config.dbEndpoint,
+      host: config.dbHost,
       database: config.dbSchema,
       username: config.dbUsername,
       password: config.dbPassword,
-      logging: () => config.DEBUG
+      logging: config.DEBUG ? console.debug : false
     });
     sequelize.addModels([Location]);
   }
