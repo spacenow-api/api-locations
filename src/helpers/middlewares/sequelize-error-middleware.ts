@@ -4,7 +4,7 @@ import { ValidationError, ValidationErrorItem } from 'sequelize';
 import HttpException from '../exceptions/HttpException';
 
 export default ({ errors }: ValidationError, req: Request, res: Response, next: NextFunction) => {
-  if (errors.length > 0) {
+  if (errors && errors.length > 0) {
     console.error(errors);
     const message = errors.map((error: ValidationErrorItem) => error.message)[0];
     next(new HttpException(400, message));

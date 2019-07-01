@@ -1,6 +1,8 @@
 import { Router, Request, Response, NextFunction, response } from 'express';
 import crypto from 'crypto';
 
+import HttpException from '../helpers/exceptions/HttpException';
+
 import sequelizeErrorMiddleware from '../helpers/middlewares/sequelize-error-middleware';
 
 import { Location, UniqueLocation } from '../models';
@@ -45,8 +47,8 @@ class LocationController {
       async (req: Request, res: Response, next: NextFunction) => {
         const data = req.body;
         try {
-          if (!data.suggestAddress || data.suggestAddress.length <= 0) {
-            throw new Error('A reference address must be provided.');
+          if (!data.suggestAddress) {
+            next(new HttpException(400, 'A reference address must be provided.'));
           }
           const hash = getHash(data.suggestAddress);
           const uniLocationObj = await UniqueLocation.findOne({ where: { id: hash } });
