@@ -92,7 +92,7 @@ class LocationController {
           try {
             geoAddress = await this.getGoogleGeoCodeAddress(data.suggestAddress);
             const { dataValues }: any = await Location.create({
-              userId: data.userId, // TODO Remove user id and get from token...
+              userId: req.userIdDecoded,
               ...geoAddress
             });
             await UniqueLocation.create({ id: hash, locationId: dataValues.id });

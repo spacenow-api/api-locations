@@ -5,14 +5,18 @@ import axios from 'axios';
 import AuthenticationTokenMissingException from '../exceptions/AuthenticationTokenMissingException';
 import WrongAuthenticationTokenException from '../exceptions/WrongAuthenticationTokenException';
 
+import { IUser } from './../../interfaces/user.interface';
+
 import Token from '../utils/token';
 
 import * as config from './../../config';
 
 const fetchUserById = async (id: string): Promise<string> => {
-  const { data } = await axios.get(`${config.USERS_AUTHENTICATION_API_HOST}/users/legancy/${id}`);
-  if (data && data.email)
-    return Promise.resolve(data.email);
+  const res = await axios.get(`${config.USERS_AUTHENTICATION_API_HOST}/users/legancy/${id}`);
+  if (res && res.data) {
+    const userData: IUser = res.data;
+    return Promise.resolve(userData.email);
+  }
   return Promise.reject();
 }
 
