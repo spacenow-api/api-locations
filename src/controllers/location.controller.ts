@@ -65,7 +65,7 @@ class LocationController {
      */
     this.router.get('/locations/:id', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const locationObj: Location = await Location.findOne({ where: { id: req.params.id } });
+        const locationObj: Location | null = await Location.findOne({ where: { id: req.params.id } });
         res.send(locationObj);
       } catch (error) {
         sequelizeErrorMiddleware(error, req, res, next);
@@ -91,7 +91,7 @@ class LocationController {
           let geoAddress: IGeoResponse;
           try {
             geoAddress = await this.getGoogleGeoCodeAddress(data.suggestAddress);
-            const { dataValues } = await Location.create({
+            const { dataValues }: any = await Location.create({
               userId: data.userId, // TODO Remove user id and get from token...
               ...geoAddress
             });
