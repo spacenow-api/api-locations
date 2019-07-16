@@ -6,12 +6,13 @@ import WrongAuthenticationTokenException from '../exceptions/WrongAuthentication
 
 import Token from '../utils/token';
 
-async function authMiddleware(req: Request, res: Response, next: NextFunction) {
-  const token = new Token().getToken(req);
-  if (token) {
+async function authMiddleware(req: Request, _: Response, next: NextFunction) {
+  const token = Token.get(req);
+  if (token && token !== 'undefined') {
     const secret: string = process.env.JWT_SECRET || 'Spacenow';
     try {
-      await jwt.verify(token, secret);
+      const { id }: any = await jwt.verify(token, secret);
+      req.userIdDecoded = id;
       next();
     } catch (error) {
       next(new WrongAuthenticationTokenException());
