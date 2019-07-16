@@ -62,19 +62,16 @@ class LocationController {
     /**
      * Get location by id.
      */
-    this.router.get(
-      '/locations/:id',
-      async (req: Request, res: Response, next: NextFunction) => {
-        try {
-          const locationObj: Location = await Location.findOne({
-            where: { id: req.params.id }
-          });
-          res.send(locationObj);
-        } catch (error) {
-          sequelizeErrorMiddleware(error, req, res, next);
-        }
+    this.router.get('/locations/:id', async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const locationObj: Location = await Location.findOne({
+          where: { id: req.params.id }
+        });
+        res.send(locationObj);
+      } catch (error) {
+        sequelizeErrorMiddleware(error, req, res, next);
       }
-    );
+    });
 
     /**
      * Get or create location by address.

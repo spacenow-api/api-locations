@@ -6,12 +6,8 @@ import WrongAuthenticationTokenException from '../exceptions/WrongAuthentication
 
 import Token from '../utils/token';
 
-async function authMiddleware(
-  request: Request,
-  response: Response,
-  next: NextFunction
-) {
-  const token = new Token().getToken(request);
+async function authMiddleware(req: Request, res: Response, next: NextFunction) {
+  const token = new Token().getToken(req);
   if (token) {
     const secret: string = process.env.JWT_SECRET || 'Spacenow';
     try {
