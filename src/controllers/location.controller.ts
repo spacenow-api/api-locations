@@ -1,11 +1,15 @@
-import { Router, Request, Response, NextFunction, response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
+import axios from 'axios';
 
 import HttpException from '../helpers/exceptions/HttpException';
-
 import sequelizeErrorMiddleware from '../helpers/middlewares/sequelize-error-middleware';
 
+import { IGeoResponse } from './../interfaces/location.interface';
+import { RootObject } from './../interfaces/geoCode.interface';
 import { Location, UniqueLocation } from '../models';
+
+import * as config from './../config';
 
 const getHash = (suggestAddress: string) => {
   return crypto
@@ -19,6 +23,39 @@ class LocationController {
 
   constructor() {
     this.intializeRoutes();
+  }
+
+  async getGoogleGeoCodeAddress(suggestAddress: string): Promise<IGeoResponse> {
+    const URL = 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURI(suggestAddress) + '&key=' + config.googleMapAPI;
+    const resp = await axios.get(URL);
+    const geoData: RootObject = await resp.data;
+    const locationData: any = {};
+    if (geoData && geoData.results && geoData.results.length > 0) {
+      geoData.results.map((item) => {
+        item.address_components.map((value) => {
+          if (value.types[0] == 'administrative_area_level_1' || value.types[0] == 'country') {
+            locationData[value.types[0]] = value.short_name;
+          } else {
+            locationData[value.types[0]] = value.long_name;
+          }
+        });
+      });
+      const city = locationData.locality != undefined ? locationData.locality : locationData.administrative_area_level_2;
+      const buildingName = (locationData.subpremise != undefined ? locationData.subpremise : '') + ' ' + (locationData.premise != undefined ? locationData.premise : '');
+      const address1 = locationData.street_number ? locationData.street_number + ' ' + locationData.route : locationData.route
+      return Promise.resolve({
+        address1: address1,
+        buildingName: buildingName,
+        country: locationData.country,
+        city: city,
+        state: locationData.administrative_area_level_1,
+        zipcode: locationData.postal_code,
+        lat: geoData.results[0].geometry.location.lat,
+        lng: geoData.results[0].geometry.location.lng
+      });
+    } else {
+      return Promise.reject();
+    }
   }
 
   private intializeRoutes() {
@@ -56,22 +93,19 @@ class LocationController {
             const locationObj = await Location.findOne({ where: { id: uniLocationObj.locationId } });
             res.send(locationObj);
           } else {
-            // Creating a new location...
-            const locationObj = {
-              userId: data.userId, // TODO Remove user id and get from token...
-              country: data.country,
-              address1: data.address1,
-              address2: data.address2,
-              buildingName: data.buildingName,
-              city: data.city,
-              state: data.state,
-              zipcode: data.zipcode,
-              lat: data.lat,
-              lng: data.lng
-            };
-            const { dataValues } = await Location.create(locationObj);
-            await UniqueLocation.create({ id: hash, locationId: dataValues.id });
-            res.send({ ...dataValues });
+            // Creating a new location from Google API data...
+            let geoAddress: IGeoResponse;
+            try {
+              geoAddress = await this.getGoogleGeoCodeAddress(data.suggestAddress);
+              const { dataValues } = await Location.create({
+                userId: data.userId, // TODO Remove user id and get from token...
+                ...geoAddress
+              });
+              await UniqueLocation.create({ id: hash, locationId: dataValues.id });
+              res.send({ ...dataValues });
+            } catch (err) {
+              next(new HttpException(400, `Address ${data.suggestAddress} not found by Google API.`));
+            }
           }
         } catch (error) {
           sequelizeErrorMiddleware(error, req, res, next);
