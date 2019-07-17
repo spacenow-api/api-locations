@@ -67,8 +67,9 @@ class LocationController {
       try {
         const locationObj: Location | null = await Location.findOne({ where: { id: req.params.id } });
         res.send(locationObj);
-      } catch (error) {
-        sequelizeErrorMiddleware(error, req, res, next);
+      } catch (err) {
+        console.error(err);
+        sequelizeErrorMiddleware(err, req, res, next);
       }
     });
 
@@ -101,8 +102,9 @@ class LocationController {
             next(new HttpException(400, `Address ${data.suggestAddress} not found by Google API.`));
           }
         }
-      } catch (error) {
-        sequelizeErrorMiddleware(error, req, res, next);
+      } catch (err) {
+        console.error(err);
+        sequelizeErrorMiddleware(err, req, res, next);
       }
     });
   }
