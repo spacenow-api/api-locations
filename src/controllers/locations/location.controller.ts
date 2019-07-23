@@ -97,25 +97,16 @@ class LocationController {
     /**
      * Get or create location by address.
      */
-    this.router.post(
-      "/locations",
-      authMiddleware,
-      async (req: Request, res: Response, next: NextFunction) => {
+    this.router.post("/locations", authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
         const data = req.body;
         try {
-          if (!data.suggestAddress) {
-            next(
-              new HttpException(400, "A reference address must be provided.")
-            );
+          if (!data || !data.suggestAddress) {
+            throw new HttpException(400, "A reference address must be provided.");
           }
           const hash = getHash(data.suggestAddress);
-          const uniLocationObj = await UniqueLocation.findOne({
-            where: { id: hash }
-          });
+          const uniLocationObj = await UniqueLocation.findOne({ where: { id: hash } });
           if (uniLocationObj) {
-            const locationObj = await Location.findOne({
-              where: { id: uniLocationObj.locationId }
-            });
+            const locationObj = await Location.findOne({ where: { id: uniLocationObj.locationId } });
             res.send(locationObj);
           } else {
             // Creating a new location from Google API data...
