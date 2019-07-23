@@ -104,8 +104,8 @@ Parameters:
     Type: String
     Default: ""
     NoEcho: true
-  GoogleMapsKey:
-    Description: "GOOGLE_MAPS_KEY"
+  GoogleMapApi:
+    Description: "GOOGLE_MAP_API"
     Type: String
     Default: ""
     NoEcho: true
@@ -221,8 +221,8 @@ Resources:
               Value: !Ref JwtSecret
             - Name: USERS_API_HOST
               Value: !Ref UsersApiHost
-            - Name: GOOGLE_MAPS_KEY
-              Value: !Ref GoogleMapsKey
+            - Name: GOOGLE_MAP_API
+              Value: !Ref GoogleMapApi
 
           LogConfiguration:
             LogDriver: awslogs
