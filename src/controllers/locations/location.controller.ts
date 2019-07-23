@@ -12,10 +12,11 @@ import { Location, UniqueLocation } from "../../models";
 
 import * as config from "../../config";
 
-const getHash = (suggestAddress: string) => {
+const getHash = (suggestAddress: string, userId: string = '') => {
+  const stringReference: string = suggestAddress + userId;
   return crypto
     .createHash("sha256")
-    .update(suggestAddress, "utf8")
+    .update(stringReference, "utf8")
     .digest("base64");
 };
 
@@ -27,11 +28,7 @@ class LocationController {
   }
 
   async getGoogleGeoCodeAddress(suggestAddress: string): Promise<IGeoResponse> {
-    const URL =
-      "https://maps.googleapis.com/maps/api/geocode/json?address=" +
-      encodeURI(suggestAddress) +
-      "&key=" +
-      config.googleMapAPI;
+    const URL = "https://maps.googleapis.com/maps/api/geocode/json?address=" + encodeURI(suggestAddress) + "&key=" + config.googleMapAPI;
     const resp = await axios.get(URL);
     const geoData: RootObject = await resp.data;
     const locationData: any = {};
@@ -78,53 +75,48 @@ class LocationController {
     /**
      * Get location by id.
      */
-    this.router.get(
-      "/locations/:id",
-      authMiddleware,
-      async (req: Request, res: Response, next: NextFunction) => {
-        try {
-          const locationObj: Location | null = await Location.findOne({
-            where: { id: req.params.id }
-          });
-          res.send(locationObj);
-        } catch (err) {
-          console.error(err);
-          sequelizeErrorMiddleware(err, req, res, next);
-        }
+    this.router.get("/locations/:id", authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const locationObj: Location | null = await Location.findOne({ where: { id: req.params.id } });
+        res.send(locationObj);
+      } catch (err) {
+        console.error(err);
+        sequelizeErrorMiddleware(err, req, res, next);
       }
+    }
     );
 
     /**
      * Get or create location by address.
      */
     this.router.post("/locations", authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
-        const data = req.body;
-        try {
-          if (!data || !data.suggestAddress) {
-            throw new HttpException(400, "A reference address must be provided.");
-          }
-          const hash = getHash(data.suggestAddress);
-          const uniLocationObj = await UniqueLocation.findOne({ where: { id: hash } });
-          if (uniLocationObj) {
-            const locationObj = await Location.findOne({ where: { id: uniLocationObj.locationId } });
-            res.send(locationObj);
-          } else {
-            // Creating a new location from Google API data...
-            let geoAddress: any;
-            try {
-              geoAddress = await this.getGoogleGeoCodeAddress(data.suggestAddress);
-            } catch (err) {
-              throw new HttpException(400, `Address ${data.suggestAddress} not found by Google API.`);
-            }
-            const { dataValues }: any = await Location.create({ userId: req.userIdDecoded, ...geoAddress });
-            await UniqueLocation.create({ id: hash, locationId: dataValues.id });
-            res.send({ ...dataValues });
-          }
-        } catch (err) {
-          console.error(err);
-          sequelizeErrorMiddleware(err, req, res, next);
+      const data = req.body;
+      try {
+        if (!data || !data.suggestAddress) {
+          throw new HttpException(400, "A reference address must be provided.");
         }
+        const hash = getHash(data.suggestAddress, req.userIdDecoded);
+        const uniLocationObj = await UniqueLocation.findOne({ where: { id: hash } });
+        if (uniLocationObj) {
+          const locationObj = await Location.findOne({ where: { id: uniLocationObj.locationId } });
+          res.send(locationObj);
+        } else {
+          // Creating a new location from Google API data...
+          let geoAddress: any;
+          try {
+            geoAddress = await this.getGoogleGeoCodeAddress(data.suggestAddress);
+          } catch (err) {
+            throw new HttpException(400, `Address ${data.suggestAddress} not found by Google API.`);
+          }
+          const { dataValues }: any = await Location.create({ userId: req.userIdDecoded, ...geoAddress });
+          await UniqueLocation.create({ id: hash, locationId: dataValues.id });
+          res.send({ ...dataValues });
+        }
+      } catch (err) {
+        console.error(err);
+        sequelizeErrorMiddleware(err, req, res, next);
       }
+    }
     );
   }
 }
