@@ -5,7 +5,7 @@ export const DEBUG = process.env.DEBUG ? Boolean(process.env.DEBUG) : false;
 
 export const PORT = process.env.PORT ? parseInt(process.env.PORT) : 6005;
 
-export const googleMapAPI = process.env.GOOGLE_MAPS_KEY;
+export const googleMapAPI = process.env.GOOGLE_MAP_API;
 
 // Database Parameters
 export const dbSchema = process.env.DATABASE_SCHEMA;
