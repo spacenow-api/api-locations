@@ -119,28 +119,15 @@ class LocationController {
             res.send(locationObj);
           } else {
             // Creating a new location from Google API data...
-            let geoAddress: IGeoResponse;
+            let geoAddress: any;
             try {
-              geoAddress = await this.getGoogleGeoCodeAddress(
-                data.suggestAddress
-              );
-              const { dataValues }: any = await Location.create({
-                userId: req.userIdDecoded,
-                ...geoAddress
-              });
-              await UniqueLocation.create({
-                id: hash,
-                locationId: dataValues.id
-              });
-              res.send({ ...dataValues });
+              geoAddress = await this.getGoogleGeoCodeAddress(data.suggestAddress);
             } catch (err) {
-              next(
-                new HttpException(
-                  400,
-                  `Address ${data.suggestAddress} not found by Google API.`
-                )
-              );
+              throw new HttpException(400, `Address ${data.suggestAddress} not found by Google API.`);
             }
+            const { dataValues }: any = await Location.create({ userId: req.userIdDecoded, ...geoAddress });
+            await UniqueLocation.create({ id: hash, locationId: dataValues.id });
+            res.send({ ...dataValues });
           }
         } catch (err) {
           console.error(err);
