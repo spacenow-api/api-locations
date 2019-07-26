@@ -108,7 +108,11 @@ class LocationController {
           } catch (err) {
             throw new HttpException(400, `Address ${data.suggestAddress} not found by Google API.`);
           }
-          const { dataValues }: any = await Location.create({ userId: req.userIdDecoded, ...geoAddress });
+          const { dataValues }: any = await Location.create({
+            ...geoAddress,
+            userId: req.userIdDecoded,
+            buildingName: data.unit
+          });
           await UniqueLocation.create({ id: hash, locationId: dataValues.id });
           res.send({ ...dataValues });
         }
@@ -116,8 +120,7 @@ class LocationController {
         console.error(err);
         sequelizeErrorMiddleware(err, req, res, next);
       }
-    }
-    );
+    });
   }
 }
 
