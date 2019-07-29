@@ -40,7 +40,7 @@ DB_SCHEMA=$(get_ssm_parameter /$2/SPACENOW/DATABASE_SCHEMA)
 JWT_SECRET=$(get_ssm_parameter /$2/SPACENOW/JWT_SECRET)
 USERS_API_HOST=$(get_ssm_parameter /$2/SPACENOW/USERS_API_HOST)
 GOOGLE_MAP_API=$(get_ssm_parameter /$2/SPACENOW/GOOGLE_MAP_API)
-ACM_CERTIFICATE=$(get_ssm_parameter /$2/ACM_CERTIFICATE)
+ACM_CERTIFICATE=$(get_ssm_parameter /$2/SPACENOW/ACM_CERTIFICATE)
 echo "ENV ${2}"
 CF_PARAMS="ParameterKey=ImageUrl,ParameterValue=$3 \
           ParameterKey=ContainerPort,ParameterValue=6005 \
