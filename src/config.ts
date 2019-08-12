@@ -3,7 +3,7 @@ dotenv.config();
 
 export const DEBUG = process.env.DEBUG ? /true/i.test(process.env.DEBUG) : false;
 
-export const PORT = process.env.PORT ? parseInt(process.env.PORT) : 6005;
+export const PORT = 6005;
 
 export const googleMapAPI = process.env.GOOGLE_MAP_API;
 
