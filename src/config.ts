@@ -11,6 +11,6 @@ export const googleMapAPI = process.env.GOOGLE_MAP_API;
 export const dbSchema = process.env.DATABASE_SCHEMA;
 export const dbUsername = process.env.DATABASE_USERNAME;
 export const dbPassword = process.env.DATABASE_PASSWORD;
-export const dbHost = process.env.DATABASE_ENDPOINT;
+export const dbHost = process.env.DATABASE_HOST;
 
 export const USERS_AUTHENTICATION_API_HOST = process.env.USERS_AUTHENTICATION_API_HOST || "http://localhost:6001";
