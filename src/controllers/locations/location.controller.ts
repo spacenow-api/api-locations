@@ -75,7 +75,7 @@ class LocationController {
     /**
      * Get location by id.
      */
-    this.router.get("/locations/:id", authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+    this.router.get("/locations/:id", async (req: Request, res: Response, next: NextFunction) => {
       try {
         const locationObj: Location | null = await Location.findOne({ where: { id: req.params.id } });
         res.send(locationObj);
