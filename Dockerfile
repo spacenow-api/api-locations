@@ -23,4 +23,6 @@ COPY --from=first-stage /app ./
 
 EXPOSE 6005
 
+ENV NODE_ENV "production"
+
 CMD ["yarn", "prod"]
