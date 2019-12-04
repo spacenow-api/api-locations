@@ -7,10 +7,10 @@ import {
   UpdatedAt,
   PrimaryKey,
   AllowNull
-} from 'sequelize-typescript';
+} from "sequelize-typescript";
 
 @Table({
-  tableName: 'Location'
+  tableName: "Location"
 })
 export class Location extends Model<Location> {
   @PrimaryKey
@@ -49,6 +49,9 @@ export class Location extends Model<Location> {
 
   @Column
   lng?: string;
+
+  @Column
+  placeId?: string;
 
   @CreatedAt
   @Column
